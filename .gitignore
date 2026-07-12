@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# Raw inbound holds real message bodies + personal addresses (PII) — evidence only,
+# never committed. The redacted eval_results.{json,md} ARE committed.
+data/inbound.json

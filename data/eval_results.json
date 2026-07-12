@@ -1,0 +1,462 @@
+{
+  "summary": {
+    "total": 50,
+    "answered": 0,
+    "refused": 50,
+    "uncited_answers": 0,
+    "source": "read-only IMAP INBOX, last 50 messages (data/inbound.json)",
+    "note": "Most real inbound is internal briefs / vendor / recruiting mail, not product-support questions, so a high REFUSE rate is CORRECT \u2014 the engine escalates rather than guessing."
+  },
+  "rows": [
+    {
+      "idx": 0,
+      "from": "@gmail.com",
+      "subject": "Utah morning brief \u2014 2026-07-12",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.04<0.34)"
+    },
+    {
+      "idx": 1,
+      "from": "@gmail.com",
+      "subject": "Re: Black Label Internship",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 2,
+      "from": "@email.claude.com",
+      "subject": "Fable 5 access and increased Claude Code rate limits are extended through\r\n Sunday, July 19",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.12<0.34)"
+    },
+    {
+      "idx": 3,
+      "from": "@gmail.com",
+      "subject": "Re: Black Label Internship",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.06<0.34)"
+    },
+    {
+      "idx": 4,
+      "from": "@gmail.com",
+      "subject": "Re: Black Label Internship",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 5,
+      "from": "@email.openai.com",
+      "subject": "Your scheduled tasks are getting better",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 6,
+      "from": "@blvigil.com",
+      "subject": "Utah morning brief \u2014 2026-07-11",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.04<0.34)"
+    },
+    {
+      "idx": 7,
+      "from": "@sentry.io",
+      "subject": "Reminder: Create a project (free trial ending soon)",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.09<0.34)"
+    },
+    {
+      "idx": 8,
+      "from": "@visible.vc",
+      "subject": "Continue Building Your Fundraising Momentum",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 9,
+      "from": "@otter.ai",
+      "subject": "We'd love to hear from you Michael",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.06<0.34)"
+    },
+    {
+      "idx": 10,
+      "from": "@gmail.com",
+      "subject": "Appointment booked: Black label Software (Brady Byrnes) @ Tue Jul 14,\r\n 2026 11am - 11:30am (EDT) (Michael Barber)",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.09<0.34)"
+    },
+    {
+      "idx": 11,
+      "from": "@gmail.com",
+      "subject": "Westend Drum Cheat Sheet (FL Studio)",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.03<0.34)"
+    },
+    {
+      "idx": 12,
+      "from": "@gmail.com",
+      "subject": "Frozen-Dairy Distributor Contacts \u2014 829 leads (forward to client)",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.12<0.34)"
+    },
+    {
+      "idx": 13,
+      "from": "@linear.app",
+      "subject": "Reminder to post a project update for Utah Pipeline \u2014 Historical Ingest",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.10<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 14,
+      "from": "@info.getflex.com",
+      "subject": "Your Flex Rent Line of Credit statement is here ",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": true,
+      "reason": "below-sensitive-threshold(coverage=0.10<0.5)"
+    },
+    {
+      "idx": 15,
+      "from": "@askforfunding.com",
+      "subject": "Founders like you got funded this week. Your matches are ready.",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 16,
+      "from": "@slack.com",
+      "subject": "Linear mentioned you in #Linear",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.08<0.34)"
+    },
+    {
+      "idx": 17,
+      "from": "@mail.docusign.com",
+      "subject": "You're in! Welcome to Docusign",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.11<0.34)"
+    },
+    {
+      "idx": 18,
+      "from": "@visible.vc",
+      "subject": "The investor reply you forgot to follow up on",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": true,
+      "reason": "below-sensitive-threshold(overlap=3<4, coverage=0.05<0.5)"
+    },
+    {
+      "idx": 19,
+      "from": "@info.getflex.com",
+      "subject": "Got a minute? Leave Flex a review.",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.05<0.34)"
+    },
+    {
+      "idx": 20,
+      "from": "@mg.homedepot.com",
+      "subject": "Projects Get Done Here \ud83d\udccd For $100 a Month",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.05<0.34)"
+    },
+    {
+      "idx": 21,
+      "from": "@slack.com",
+      "subject": "Your trial of Slack\u2019s Pro plan has ended",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.08<0.34)"
+    },
+    {
+      "idx": 22,
+      "from": "@e.mail.realtor.com",
+      "subject": "| Top US Listings: See What's Trending |",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 23,
+      "from": "@al.mail.deepseek.com",
+      "subject": "Your verification code for DeepSeek",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.09<0.34)"
+    },
+    {
+      "idx": 24,
+      "from": "@askforfunding.com",
+      "subject": "Three Active Investors from Ask For Funding",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.10<0.34)"
+    },
+    {
+      "idx": 25,
+      "from": "@google.com",
+      "subject": "Aden left a review for Black Label Trading",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.10<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 26,
+      "from": "@google.com",
+      "subject": "cade left a review for black label bots",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.11<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 27,
+      "from": "@linear.app",
+      "subject": "Reminder to post a project update for Utah Pipeline \u2014 Historical Ingest",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.10<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 28,
+      "from": "@slack.com",
+      "subject": "Linear mentioned you in #Linear",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.08<0.34)"
+    },
+    {
+      "idx": 29,
+      "from": "@updates.linear.app",
+      "subject": "New login to Linear",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=1<3, coverage=0.11<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 30,
+      "from": "@accounts.google.com",
+      "subject": "Security alert",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.11<0.34)"
+    },
+    {
+      "idx": 31,
+      "from": "@accounts.google.com",
+      "subject": "Security alert for mthburnsbarber@gmail.com",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.11<0.34)"
+    },
+    {
+      "idx": 32,
+      "from": "@accounts.google.com",
+      "subject": "Security alert for mthburnsbarber@gmail.com",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.11<0.34)"
+    },
+    {
+      "idx": 33,
+      "from": "@accounts.google.com",
+      "subject": "Security alert",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.11<0.34)"
+    },
+    {
+      "idx": 34,
+      "from": "@google.com",
+      "subject": "You are now a manager of black label bots",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.11<0.34)"
+    },
+    {
+      "idx": 35,
+      "from": "@google.com",
+      "subject": "michael barber invited you to manage black label bots",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.13<0.34)"
+    },
+    {
+      "idx": 36,
+      "from": "@google.com",
+      "subject": "Invite only: Help shape the future of Google AI",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.10<0.34)"
+    },
+    {
+      "idx": 37,
+      "from": "@askforfunding.com",
+      "subject": "michael, Investors Capable of Providing $200k to black label bots",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34, content-overlap=0<2)"
+    },
+    {
+      "idx": 38,
+      "from": "@rentcafe.com",
+      "subject": "Summer Savings at The Quinn - We Welcome YOU!",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": true,
+      "reason": "below-sensitive-threshold(overlap=3<4, coverage=0.06<0.5)"
+    },
+    {
+      "idx": 39,
+      "from": "@sentry.io",
+      "subject": "No project = missed bugs",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.09<0.34)"
+    },
+    {
+      "idx": 40,
+      "from": "@askforfunding.com",
+      "subject": "Recently Funded Companies on AskForFunding.com",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.05<0.34)"
+    },
+    {
+      "idx": 41,
+      "from": "@account.docusign.net",
+      "subject": "Your code is 633951",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 42,
+      "from": "@mg.homedepot.com",
+      "subject": "\u2b55\ufe0f Ending SOON \u2b55\ufe0f 4th of July Deals",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=2<3, coverage=0.05<0.34)"
+    },
+    {
+      "idx": 43,
+      "from": "@email.slackhq.com",
+      "subject": "Michael, try creating a channel in Slack",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.08<0.34)"
+    },
+    {
+      "idx": 44,
+      "from": "@google.com",
+      "subject": "Updates to Google Play Terms of Service",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.07<0.34)"
+    },
+    {
+      "idx": 45,
+      "from": "@e.mail.realtor.com",
+      "subject": "See new homes before anyone else",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.06<0.34)"
+    },
+    {
+      "idx": 46,
+      "from": "@email.claude.com",
+      "subject": "Fable 5 access is extended through Sunday",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(overlap=1<3, coverage=0.10<0.34, content-overlap=1<2)"
+    },
+    {
+      "idx": 47,
+      "from": "@leasing-thompsonthrift.com",
+      "subject": "Re: Apartment Inquiry at The Quinn Luxury Apartments",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.08<0.34)"
+    },
+    {
+      "idx": 48,
+      "from": "@google.com",
+      "subject": "Black Label Trading, your performance report for June 2026",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.09<0.34)"
+    },
+    {
+      "idx": 49,
+      "from": "@askforfunding.com",
+      "subject": "Three Active Investors from Ask For Funding",
+      "verdict": "REFUSED",
+      "citation": null,
+      "sensitive": false,
+      "reason": "below-threshold(coverage=0.10<0.34)"
+    }
+  ]
+}
