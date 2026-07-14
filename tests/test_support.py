@@ -259,6 +259,67 @@ def test_price_index_present_still_refuses_unnamed_and_offtopic():
     assert a.answer("What is the capital of France?").text == REFUSAL
 
 
+# --- Tooth 13: EVAL LANE — evaluate() answers a price inbound, refuses off-topic ---
+def test_eval_lane_prices_with_citation_and_refuses_offtopic():
+    """The v1.2 eval lane, run hermetically over inbound-shaped messages with a fake
+    live price index: a price question that NAMES a product is ANSWERED with a real
+    citation and tagged priced=True; an out-of-corpus message REFUSES; and the eval
+    NEVER emits an uncited answer (the fabrication guard)."""
+    from bin.run_eval import evaluate                                # noqa: E402
+
+    row = PriceRow(key="trading", display="Black Label Trading", price="$49/mo",
+                   aliases=frozenset({"trading"}), price_id="price_TRADING",
+                   checkout_url="https://buy.stripe.com/TRADING",
+                   storefront_url="https://blacklabelbots.com/trading")
+    ans = Answerer(_grounded_corpus(), price_index=[row])
+    msgs = [
+        {"from": "buyer@example.com", "subject": "How much is Black Label Trading?",
+         "body": "Thinking of buying — what does it cost per month?"},
+        {"from": "spammer@somewhere.io", "subject": "What is the capital of France?",
+         "body": "totally unrelated"},
+        {"from": "curious@example.com", "subject": "How much does it cost?",
+         "body": "no product named"},   # names no product -> must refuse, never guess
+    ]
+    rows, summary = evaluate(msgs, ans)
+
+    # message 0: verified-price answer WITH citation
+    assert rows[0]["verdict"] == "ANSWERED", rows[0]
+    assert rows[0]["priced"] is True
+    assert rows[0]["citation"] == "https://blacklabelbots.com/trading"
+    # messages 1 & 2: refuse (off-topic; unnamed price question never guesses)
+    assert rows[1]["verdict"] == "REFUSED"
+    assert rows[2]["verdict"] == "REFUSED"
+    # eval-lane invariants
+    assert summary["answered_with_citation"] == 1
+    assert summary["priced_answers"] == 1
+    assert summary["refused"] == 2
+    assert summary["uncited_answers"] == 0          # a fabrication would trip this
+
+
+# --- Tooth 14: EVAL LANE — an ANSWERED verdict can NEVER be uncited ---------------
+def test_eval_lane_answered_implies_cited():
+    """Across a grounded answer AND a price answer, evaluate() must record a citation
+    for every ANSWERED row — an uncited answer is a fabrication and must be impossible."""
+    from bin.run_eval import evaluate                                # noqa: E402
+
+    row = PriceRow(key="trading", display="Black Label Trading", price="$49/mo",
+                   aliases=frozenset({"trading"}), price_id="price_TRADING",
+                   checkout_url="https://buy.stripe.com/TRADING",
+                   storefront_url="https://blacklabelbots.com/trading")
+    ans = Answerer(_grounded_corpus(), price_index=[row])
+    msgs = [
+        {"from": "a@b.com", "subject": "set up sending mailbox on port 465 in Leads",
+         "body": "how do I connect my SMTP mailbox to start the lead finder?"},
+        {"from": "a@b.com", "subject": "How much is Black Label Trading?", "body": ""},
+    ]
+    rows, summary = evaluate(msgs, ans)
+    for r in rows:
+        if r["verdict"] == "ANSWERED":
+            assert r["citation"], f"ANSWERED row must be cited: {r}"
+    assert summary["answered_with_citation"] == summary["answered"]
+    assert summary["uncited_answers"] == 0
+
+
 if __name__ == "__main__":
     import traceback
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
