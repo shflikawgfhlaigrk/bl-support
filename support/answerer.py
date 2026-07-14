@@ -22,6 +22,7 @@ from pathlib import Path
 
 from .corpus import Chunk, load_corpus, tokenize
 from . import price_gate
+from .price_index import PriceRow
 
 # ProjectUtah/ops on path for claim_linter (also handled in corpus.py).
 _OPS = Path.home() / "ProjectUtah" / "ops"
@@ -35,6 +36,12 @@ REFUSAL = (
     f"account-specific questions — please email a human at {ESCALATION} and the "
     "team will help you directly."
 )
+
+# Price-question intent: tokens that signal the buyer is asking what something costs.
+PRICE_INTENT = {
+    "price", "prices", "pricing", "cost", "costs", "much", "expensive", "fee",
+    "fees", "charge", "rate", "priced", "afford",
+}
 
 # Intents where a wrong answer is most costly: demand a stronger grounded hit.
 SENSITIVE = {
@@ -86,10 +93,37 @@ def _claim_clean(text: str) -> bool:
 
 
 class Answerer:
-    def __init__(self, chunks: list[Chunk] | None = None):
+    def __init__(self, chunks: list[Chunk] | None = None,
+                 price_index: list[PriceRow] | None = None):
         if chunks is None:
             chunks, _ = load_corpus()
         self.chunks = chunks
+        # A LIVE-VERIFIED price index (or None). When present, a price question that
+        # names a product with a proven price is answered WITH a citation instead of
+        # refused. Absent/empty index -> price questions fall through and refuse.
+        self.price_index = price_index or []
+
+    def _price_answer(self, q_tokens: frozenset[str]) -> Answer | None:
+        """If this is a price question naming a product with a verified price, answer it.
+
+        Returns an Answer on a confident hit, else None (caller falls through to the
+        extractive path, which refuses out-of-corpus / weakly-grounded price questions).
+        """
+        if not self.price_index or not (q_tokens & PRICE_INTENT):
+            return None
+        # Match the single product whose identifying aliases the question names. Require
+        # exactly one matched product so an ambiguous multi-product question refuses.
+        matched = [r for r in self.price_index if q_tokens & r.aliases]
+        if len(matched) != 1:
+            return None
+        row = matched[0]
+        emitted = (f"{row.display} is {row.price}.\n\n"
+                   f"— Source: {row.citation()} · Questions we can't cover: {ESCALATION}")
+        # Fail closed: even a verified row's emitted text must clear the price gate.
+        if not price_gate.check(emitted):
+            return Answer(False, REFUSAL, None, 1.0, True, "price-gate-red")
+        return Answer(True, emitted, row.storefront_url, 1.0, True,
+                      f"verified-price(product={row.key}, price_id={row.price_id})")
 
     def _rank(self, q_tokens: frozenset[str]) -> tuple[Chunk | None, float, int]:
         best, best_score, best_overlap = None, 0.0, 0
@@ -112,6 +146,12 @@ class Answerer:
         sensitive = bool(q_tokens & SENSITIVE)
         if not q_tokens:
             return Answer(False, REFUSAL, None, 0.0, sensitive, "empty-question")
+
+        # A live-verified price question is answered from the price index, with a
+        # citation. Any other price question falls through to refuse (below).
+        priced = self._price_answer(q_tokens)
+        if priced is not None:
+            return priced
 
         best, score, overlap = self._rank(q_tokens)
         coverage = overlap / max(1, len(q_tokens))
@@ -148,7 +188,15 @@ class Answerer:
 
 
 if __name__ == "__main__":
-    a = Answerer()
+    # Build the LIVE price index so price questions answer with a citation. If the
+    # build fails (offline / Stripe down), the index is empty and price questions
+    # refuse — fail-closed, never a guessed price.
+    try:
+        from .price_index import build_index
+        _rows, _ = build_index()
+    except Exception:
+        _rows = []
+    a = Answerer(price_index=_rows)
     q = " ".join(sys.argv[1:]) or "How do I fix email being held back?"
     r = a.answer(q)
     print(f"Q: {q}\nANSWERED: {r.answered} ({r.reason})\n")

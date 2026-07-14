@@ -22,6 +22,59 @@ sys.path.insert(0, str(ROOT))
 from support.answerer import Answerer, REFUSAL, ESCALATION           # noqa: E402
 from support.corpus import Chunk, load_corpus                        # noqa: E402
 from support import price_gate                                       # noqa: E402
+from support import price_index as pidx                              # noqa: E402
+from support.price_index import PriceRow, build_index                # noqa: E402
+
+
+# --- hermetic fixtures for the LIVE price index (no network in tests) -------------
+class FakeFetchers:
+    """Injectable stand-in for LiveFetchers: served asset + page + Stripe price.
+
+    `stripe` maps a checkout URL -> the resolved price dict (or None). `pages` maps a
+    product page URL -> its served HTML. Lets a test force any disagreement.
+    """
+
+    ASSET = (
+        "var LINKS = {\n"
+        "  trading: 'https://buy.stripe.com/TRADING',\n"
+        "  sovereign: 'https://buy.stripe.com/SOVEREIGN',\n"
+        "};\n"
+        "var TRIAL = {\n"
+        "  trading:   { model: 'subscription', price: '$49/mo' },\n"
+        "  sovereign: { model: 'guarantee',    price: '$500'   },\n"
+        "};\n"
+    )
+
+    def __init__(self, stripe: dict, pages: dict):
+        self._stripe = stripe
+        self._pages = pages
+
+    def get_asset(self, url):
+        return self.ASSET
+
+    def get_page(self, url):
+        return self._pages.get(url, "")
+
+    def stripe_price_for_link(self, checkout_url):
+        return self._stripe.get(checkout_url)
+
+
+def _good_stripe():
+    return {
+        "https://buy.stripe.com/TRADING": {
+            "price_id": "price_TRADING", "price": "$49/mo",
+            "price_active": True, "product_active": True, "link_active": True},
+        "https://buy.stripe.com/SOVEREIGN": {
+            "price_id": "price_SOV", "price": "$500",
+            "price_active": True, "product_active": True, "link_active": True},
+    }
+
+
+def _good_pages():
+    return {
+        "https://blacklabelbots.com/trading": "<p>Trading Engine — $49/mo, cancel anytime.</p>",
+        "https://blacklabelbots.com/sovereign": "<p>Own Sovereign for $500 flat.</p>",
+    }
 
 
 def _grounded_corpus():
@@ -111,6 +164,99 @@ def test_live_corpus_is_claim_clean():
     admitted = [a for a in log if a["admitted"]]
     assert admitted, "no admitted sources"
     assert all(a["chunks"] > 0 for a in admitted)
+
+
+# --- Tooth 7: price index admits only four-way-verified rows ---------------------
+def test_price_index_admits_verified_rows():
+    rows, log = build_index(FakeFetchers(_good_stripe(), _good_pages()))
+    keys = {r.key for r in rows}
+    assert "trading" in keys and "sovereign" in keys, f"expected verified rows, got {keys}"
+    tr = next(r for r in rows if r.key == "trading")
+    assert tr.price == "$49/mo"
+    assert tr.price_id == "price_TRADING"                 # Stripe citation
+    assert tr.storefront_url.startswith("https://blacklabelbots.com")  # served-page citation
+
+
+# --- Tooth 8: served/Stripe disagreement -> row REFUSED (fail closed) -------------
+def test_price_index_refuses_on_served_stripe_mismatch():
+    bad = _good_stripe()
+    bad["https://buy.stripe.com/TRADING"] = {         # Stripe says $99, page/asset say $49
+        "price_id": "price_X", "price": "$99/mo",
+        "price_active": True, "product_active": True, "link_active": True}
+    rows, log = build_index(FakeFetchers(bad, _good_pages()))
+    keys = {r.key for r in rows}
+    assert "trading" not in keys, "mismatched price must NOT be admitted"
+    tr_log = next(e for e in log if e["key"] == "trading")
+    assert "mismatch" in tr_log["reason"], tr_log
+
+
+# --- Tooth 9: a NON-canonical price is refused even if served==stripe -------------
+def test_price_index_refuses_noncanonical_even_if_sources_agree():
+    # signals-shaped case: served asset + Stripe agree at $100/mo, but $100/mo is not
+    # in the canonical price gate -> fail closed.
+    stripe = _good_stripe()
+    stripe["https://buy.stripe.com/TRADING"] = {
+        "price_id": "price_100", "price": "$100/mo",
+        "price_active": True, "product_active": True, "link_active": True}
+    pages = dict(_good_pages())
+    pages["https://blacklabelbots.com/trading"] = "<p>$100/mo</p>"
+    # also make the served asset agree at $100/mo by patching the parsed TRIAL via a
+    # subclass whose asset shows $100/mo for trading.
+    class FF(FakeFetchers):
+        ASSET = FakeFetchers.ASSET.replace("$49/mo", "$100/mo")
+    rows, log = build_index(FF(stripe, pages))
+    assert "trading" not in {r.key for r in rows}
+    tr_log = next(e for e in log if e["key"] == "trading")
+    assert "non-canonical" in tr_log["reason"], tr_log
+
+
+# --- Tooth 10: verified price question is ANSWERED with a citation ----------------
+def test_answerer_answers_verified_price_with_citation():
+    row = PriceRow(key="trading", display="Black Label Trading", price="$49/mo",
+                   aliases=frozenset({"trading"}), price_id="price_TRADING",
+                   checkout_url="https://buy.stripe.com/TRADING",
+                   storefront_url="https://blacklabelbots.com/trading")
+    a = Answerer(_grounded_corpus(), price_index=[row])
+    r = a.answer("How much is Black Label Trading?")
+    assert r.answered is True, f"should answer, got {r.reason}"
+    assert "$49/mo" in r.text
+    assert "price_TRADING" in r.text                  # Stripe price_id cited
+    assert "blacklabelbots.com/trading" in r.text     # served-page cited
+    assert ESCALATION in r.text
+
+
+# --- Tooth 11: NEGATIVE CONTROL — a poisoned price row trips the price gate RED ---
+def test_poisoned_price_row_trips_gate_then_restores_green():
+    # A row whose price is fabricated ($9,999/mo) must NOT be emitted: the price gate
+    # fires on the assembled answer -> refusal.
+    poisoned = PriceRow(key="trading", display="Black Label Trading", price="$9,999/mo",
+                        aliases=frozenset({"trading"}), price_id="price_FAKE",
+                        checkout_url="https://buy.stripe.com/TRADING",
+                        storefront_url="https://blacklabelbots.com/trading")
+    a_bad = Answerer(_grounded_corpus(), price_index=[poisoned])
+    r_bad = a_bad.answer("How much is Trading?")
+    assert r_bad.answered is False, "poisoned price must not be emitted"
+    assert r_bad.reason == "price-gate-red", f"expected price-gate-red, got {r_bad.reason}"
+    # Restore green: the same question with the canonical row answers cleanly.
+    good = PriceRow(key="trading", display="Black Label Trading", price="$49/mo",
+                    aliases=frozenset({"trading"}), price_id="price_TRADING",
+                    checkout_url="https://buy.stripe.com/TRADING",
+                    storefront_url="https://blacklabelbots.com/trading")
+    r_good = Answerer(_grounded_corpus(), price_index=[good]).answer("How much is Trading?")
+    assert r_good.answered is True and "$49/mo" in r_good.text
+
+
+# --- Tooth 12: an out-of-corpus / unnamed price question still refuses w/ an index -
+def test_price_index_present_still_refuses_unnamed_and_offtopic():
+    row = PriceRow(key="trading", display="Black Label Trading", price="$49/mo",
+                   aliases=frozenset({"trading"}), price_id="price_TRADING",
+                   checkout_url="https://buy.stripe.com/TRADING",
+                   storefront_url="https://blacklabelbots.com/trading")
+    a = Answerer(_grounded_corpus(), price_index=[row])
+    # names no product -> no verified match -> refuse (never guess a "default" price)
+    assert a.answer("How much does it cost?").answered is False
+    # off-topic -> refuse
+    assert a.answer("What is the capital of France?").text == REFUSAL
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@
 #   1. claim_linter (canonical ProjectUtah gate) over corpus + emitted-answer probe
 #   2. price_gate over the assembled corpus text
 #   3. tests-with-teeth suite
+#   4. LIVE price-index proof (served storefront + read-only Stripe agree; >=5 cited
+#      price answers; out-of-corpus control refuses) — fail-closed on any disagreement
 # Fail-closed: any red -> non-zero exit, no exposure.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -11,7 +13,7 @@ cd "$ROOT"
 OPS="$HOME/ProjectUtah/ops"
 fail=0
 
-echo "== [1/3] claim_linter over live corpus sources =="
+echo "== [1/4] claim_linter over live corpus sources =="
 # Dump the admitted corpus text and lint it as one artifact; also lint the help dir.
 PYTHONPATH="$ROOT:$OPS" python3 - <<'PY'
 import sys
@@ -26,18 +28,25 @@ else
   echo "   claim_linter: RED"; fail=1
 fi
 
-echo "== [2/3] price_gate over corpus =="
+echo "== [2/4] price_gate over corpus =="
 if PYTHONPATH="$ROOT" python3 -m support.price_gate < /tmp/_support_corpus_dump.txt; then
   echo "   price_gate: GREEN"
 else
   echo "   price_gate: RED"; fail=1
 fi
 
-echo "== [3/3] tests-with-teeth =="
-if python3 tests/test_support.py; then
+echo "== [3/4] tests-with-teeth =="
+if PYTHONPATH="$ROOT" python3 tests/test_support.py; then
   echo "   tests: GREEN"
 else
   echo "   tests: RED"; fail=1
+fi
+
+echo "== [4/4] LIVE price-index proof (served storefront + read-only Stripe) =="
+if PYTHONPATH="$ROOT" python3 bin/build_price_index.py --gate; then
+  echo "   price-index proof: GREEN"
+else
+  echo "   price-index proof: RED"; fail=1
 fi
 
 echo

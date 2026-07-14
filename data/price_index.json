@@ -1,0 +1,118 @@
+{
+  "verified": [
+    {
+      "key": "sovereign",
+      "display": "Black Label Sovereign",
+      "price": "$500",
+      "price_id": "price_1TmTCi3oBFQ8gfJMreNLpQdR",
+      "checkout_url": "https://buy.stripe.com/14A5kwe9Igyy1Wj34L9IQ0l",
+      "storefront_url": "https://blacklabelbots.com/sovereign",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "sovereign"
+      ]
+    },
+    {
+      "key": "trading",
+      "display": "Black Label Trading",
+      "price": "$49/mo",
+      "price_id": "price_1TqWIW3oBFQ8gfJM70BrngYA",
+      "checkout_url": "https://buy.stripe.com/14AaEQ0iSbee0Sf7l19IQ0I",
+      "storefront_url": "https://blacklabelbots.com/trading",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "trading"
+      ]
+    },
+    {
+      "key": "marketing",
+      "display": "Black Label Marketing",
+      "price": "$99/mo",
+      "price_id": "price_1TqWIZ3oBFQ8gfJMswaEVXb9",
+      "checkout_url": "https://buy.stripe.com/3cIaEQ4z8fuueJ5bBh9IQ0K",
+      "storefront_url": "https://blacklabelbots.com/marketing",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "marketing"
+      ]
+    },
+    {
+      "key": "realestate",
+      "display": "Black Label Real Estate",
+      "price": "$99/mo",
+      "price_id": "price_1TqWIY3oBFQ8gfJM0Y2RxrjY",
+      "checkout_url": "https://buy.stripe.com/dRm9AM2r0eqqgRdeNt9IQ0J",
+      "storefront_url": "https://blacklabelbots.com/realestate",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "estate",
+        "realestate"
+      ]
+    },
+    {
+      "key": "academy",
+      "display": "Black Label Academy",
+      "price": "$30/mo",
+      "price_id": "price_1ToVnE3oBFQ8gfJMlKZbZ209",
+      "checkout_url": "https://buy.stripe.com/bJe4gs6Hggyy44rcFl9IQ0A",
+      "storefront_url": "https://blacklabelbots.com/academy",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "academy"
+      ]
+    },
+    {
+      "key": "circuit",
+      "display": "Black Label Circuit",
+      "price": "$25/mo",
+      "price_id": "price_1TqWIb3oBFQ8gfJMDPwXQCi0",
+      "checkout_url": "https://buy.stripe.com/5kQ14g2r0822dF1cFl9IQ0L",
+      "storefront_url": "https://blacklabelbots.com/circuit",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "circuit"
+      ]
+    },
+    {
+      "key": "sunset",
+      "display": "Black Label Sunset",
+      "price": "$25",
+      "price_id": "price_1Tpwt83oBFQ8gfJMYUVYrA1f",
+      "checkout_url": "https://buy.stripe.com/9B6dR22r02HIgRd20H9IQ0G",
+      "storefront_url": "https://blacklabelbots.com/",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "mastering",
+        "mixing",
+        "sunset"
+      ]
+    },
+    {
+      "key": "homefront",
+      "display": "Black Label Vigil",
+      "price": "$25/mo",
+      "price_id": "price_1TozPY3oBFQ8gfJMRvX6wyD1",
+      "checkout_url": "https://buy.stripe.com/9B6bIU2r0ciifN9fRx9IQ0B",
+      "storefront_url": "https://blacklabelbots.com/homefront",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "homefront",
+        "vigil"
+      ]
+    },
+    {
+      "key": "customWeb",
+      "display": "Custom Website",
+      "price": "$300",
+      "price_id": "price_1TqWJg3oBFQ8gfJM2I2qfuu1",
+      "checkout_url": "https://buy.stripe.com/cNieV6e9I2HI0SfgVB9IQ0O",
+      "storefront_url": "https://blacklabelbots.com/",
+      "asset_url": "https://blacklabelbots.com/assets/stripe-links.js",
+      "aliases": [
+        "site",
+        "website"
+      ]
+    }
+  ],
+  "refused": []
+}
