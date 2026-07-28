@@ -174,7 +174,72 @@ def test_price_index_admits_verified_rows():
     tr = next(r for r in rows if r.key == "trading")
     assert tr.price == "$49/mo"
     assert tr.price_id == "price_TRADING"                 # Stripe citation
-    assert tr.storefront_url.startswith("https://blacklabelbots.com")  # served-page citation
+    # served-page citation must be on the storefront HOST. Not `.startswith(...)`:
+    # that also accepts https://blacklabelbots.com.attacker.example/trading, so the
+    # assertion would stay green through exactly the regression it exists to catch.
+    assert pidx.is_storefront_url(tr.storefront_url), tr.storefront_url
+    assert pidx.is_checkout_url(tr.checkout_url), tr.checkout_url
+
+
+# --- Tooth 7b: citation/checkout host checks reject lookalike hosts ---------------
+def test_url_host_check_rejects_lookalike_hosts():
+    """Every URL this module cites to a buyer is host-checked, not prefix-checked."""
+    good = [
+        "https://blacklabelbots.com",
+        "https://blacklabelbots.com/trading",
+        "https://www.blacklabelbots.com/trading",   # subdomain is still us
+    ]
+    for u in good:
+        assert pidx.is_storefront_url(u), u
+
+    bad = [
+        "https://blacklabelbots.com.attacker.example/trading",  # suffix attack
+        "https://notblacklabelbots.com/trading",                # prefix glued
+        "https://attacker.example/https://blacklabelbots.com",  # host in the path
+        "https://attacker.example/?u=https://blacklabelbots.com",  # host in the query
+        "https://attacker.example/#https://blacklabelbots.com",    # host in the fragment
+        "https://blacklabelbots.com@attacker.example/trading",  # userinfo trick
+        "http://blacklabelbots.com/trading",                    # downgraded scheme
+        "javascript:alert(1)//blacklabelbots.com",
+        "",
+    ]
+    for u in bad:
+        assert not pidx.is_storefront_url(u), f"lookalike accepted: {u}"
+
+    assert pidx.is_checkout_url("https://buy.stripe.com/TRADING")
+    assert not pidx.is_checkout_url("https://buy.stripe.com.attacker.example/TRADING")
+    assert not pidx.is_checkout_url("https://attacker.example/buy.stripe.com/TRADING")
+
+
+def test_price_index_refuses_checkout_link_on_lookalike_host():
+    """A served asset whose checkout link resolves to a lookalike host admits NOTHING.
+
+    parse_served_asset's regex currently anchors the link to buy.stripe.com, so this
+    patches the parse step to prove the host guard in build_index holds on its own —
+    the guard is what survives if that regex is ever loosened.
+    """
+    real_parse = pidx.parse_served_asset
+
+    def poisoned_parse(js):
+        links, trial = real_parse(js)
+        links["trading"] = "https://buy.stripe.com.attacker.example/TRADING"
+        return links, trial
+
+    pidx.parse_served_asset = poisoned_parse
+    try:
+        stripe = _good_stripe()
+        stripe["https://buy.stripe.com.attacker.example/TRADING"] = {
+            "price_id": "price_TRADING", "price": "$49/mo",
+            "price_active": True, "product_active": True, "link_active": True}
+        rows, log = build_index(FakeFetchers(stripe, _good_pages()))
+    finally:
+        pidx.parse_served_asset = real_parse
+
+    assert "trading" not in {r.key for r in rows}, "lookalike checkout host must NOT be admitted"
+    tr_log = next(e for e in log if e["key"] == "trading")
+    assert "host is not" in tr_log["reason"], tr_log
+    # the untouched product still admits — the guard is targeted, not a blanket refusal
+    assert "sovereign" in {r.key for r in rows}
 
 
 # --- Tooth 8: served/Stripe disagreement -> row REFUSED (fail closed) -------------

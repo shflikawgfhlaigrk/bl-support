@@ -31,12 +31,50 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from . import price_gate
 
 STOREFRONT = "https://blacklabelbots.com"
 ASSET_URL = f"{STOREFRONT}/assets/stripe-links.js"
 STRIPE_KEY_PATH = Path.home() / ".utah" / "secrets" / "stripe.json"
+
+STOREFRONT_HOST = urlsplit(STOREFRONT).hostname or ""
+CHECKOUT_HOST = "buy.stripe.com"
+
+
+# --- URL host checks -------------------------------------------------------------
+def url_host_matches(url: str, domain: str) -> bool:
+    """True iff `url` is an https URL whose HOST is `domain` or a subdomain of it.
+
+    Parsed, never substring-tested. `url.startswith("https://" + domain)` also accepts
+    https://blacklabelbots.com.attacker.example/trading, and `domain in url` accepts
+    https://attacker.example/?u=blacklabelbots.com — either would let a citation this
+    module prints to a buyer point at a lookalike host. urlsplit().hostname also
+    strips userinfo, so https://blacklabelbots.com@attacker.example/ resolves to
+    attacker.example and is rejected.
+    """
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return False
+    if parts.scheme != "https":
+        return False
+    host = (parts.hostname or "").lower()
+    d = (domain or "").lower()
+    if not host or not d:
+        return False
+    return host == d or host.endswith("." + d)
+
+
+def is_storefront_url(url: str) -> bool:
+    """The served page a price was read from, and cited back to the buyer."""
+    return url_host_matches(url, STOREFRONT_HOST)
+
+
+def is_checkout_url(url: str) -> bool:
+    """The checkout link parsed out of the SERVED asset — remote input."""
+    return url_host_matches(url, CHECKOUT_HOST)
 
 
 @dataclass(frozen=True)
@@ -190,6 +228,19 @@ def build_index(fetchers: object | None = None) -> tuple[list[PriceRow], list[di
         checkout_url = links.get(prod.key)
         if not checkout_url:
             entry["reason"] = "no served checkout link"
+            log.append(entry)
+            continue
+
+        # Host checks before anything is fetched or admitted. checkout_url comes off
+        # the SERVED asset (remote input) and prod.page is cited back to the buyer, so
+        # neither is allowed onto a lookalike host. Fail closed, like every other
+        # disagreement here.
+        if not is_checkout_url(checkout_url):
+            entry["reason"] = f"served checkout link host is not {CHECKOUT_HOST}: {checkout_url}"
+            log.append(entry)
+            continue
+        if not is_storefront_url(prod.page):
+            entry["reason"] = f"product page host is not {STOREFRONT_HOST}: {prod.page}"
             log.append(entry)
             continue
 
