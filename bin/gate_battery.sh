@@ -12,24 +12,28 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 OPS="$HOME/ProjectUtah/ops"
 fail=0
+probe_dir="$(mktemp -d "${TMPDIR:-/tmp}/bl-support-gate.XXXXXXXX")"
+trap 'rm -rf -- "$probe_dir"' EXIT
+export SUPPORT_CORPUS_DUMP="$probe_dir/corpus.txt"
 
 echo "== [1/4] claim_linter over live corpus sources =="
 # Dump the admitted corpus text and lint it as one artifact; also lint the help dir.
 PYTHONPATH="$ROOT:$OPS" python3 - <<'PY'
-import sys
+import sys, os
 from support.corpus import load_corpus
 chunks, log = load_corpus(verbose=True)
-open("/tmp/_support_corpus_dump.txt","w").write("\n\n".join(c.text for c in chunks))
+with open(os.environ["SUPPORT_CORPUS_DUMP"], "x") as probe:
+    probe.write("\n\n".join(c.text for c in chunks))
 print(f"corpus: {len(chunks)} chunks; excluded={sum(1 for a in log if not a['admitted'])}")
 PY
-if python3 "$OPS/claim_linter.py" /tmp/_support_corpus_dump.txt; then
+if python3 "$OPS/claim_linter.py" "$SUPPORT_CORPUS_DUMP"; then
   echo "   claim_linter: GREEN"
 else
   echo "   claim_linter: RED"; fail=1
 fi
 
 echo "== [2/4] price_gate over corpus =="
-if PYTHONPATH="$ROOT" python3 -m support.price_gate < /tmp/_support_corpus_dump.txt; then
+if PYTHONPATH="$ROOT" python3 -m support.price_gate < "$SUPPORT_CORPUS_DUMP"; then
   echo "   price_gate: GREEN"
 else
   echo "   price_gate: RED"; fail=1

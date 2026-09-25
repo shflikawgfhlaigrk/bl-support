@@ -79,17 +79,9 @@ def _claim_clean(text: str) -> bool:
     """True if the emitted answer text carries no unsupported claim."""
     try:
         import claim_linter
+        return len(claim_linter.scan_text(text)) == 0
     except Exception:
         return False  # fail closed: no linter -> don't emit
-    tmp = Path("/tmp/_support_answer_probe.txt")
-    tmp.write_text(text)
-    try:
-        return len(claim_linter.lint([tmp])) == 0
-    finally:
-        try:
-            tmp.unlink()
-        except OSError:
-            pass
 
 
 class Answerer:
